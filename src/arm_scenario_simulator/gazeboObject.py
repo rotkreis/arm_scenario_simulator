@@ -45,7 +45,7 @@ class GazeboObject:
     try: models_paths = os.environ['GAZEBO_MODEL_PATH'].split(':')
     except: pass
     models_paths = [os.path.join(os.environ['HOME'],'.gazebo','models')]+models_paths
-    
+
     spawn_sdf_srv = rospy.ServiceProxy('/gazebo/spawn_sdf_model', SpawnModel)
     delete_model_srv = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
     get_model_state_srv = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
@@ -64,7 +64,7 @@ class GazeboObject:
     def make_publishers(self):
         for link in self.colorable_links:
             self.color_publishers[link] = rospy.Publisher('/'+self.gazebo_name+'/'+link+'/visual/set_color', MaterialColor, queue_size=1)
-            
+
     def resolve_model_path(self, model_name):
         for direc in GazeboObject.models_paths:
             attempt = os.path.join(direc, model_name)
@@ -87,13 +87,13 @@ class GazeboObject:
             GazeboObject.delete_model_srv.wait_for_service()
             resp_delete = GazeboObject.delete_model_srv(self.gazebo_name)
             self.spawned = False
-        except rospy.ServiceException, e: 
+        except rospy.ServiceException, e:
             pass # Don't know why, but an exception is raised by ROS whereas the deletion is actually successful ... So ignore the exception
 
 
     def set_state(self, position, orientation=None, linear_twist=None, angular_twist=None, reference_frame="world"):
         '''GazeboObject.set_state(self, position, orientation=None, linear_twist=None, angular_twist=None, reference_frame="world")
-        
+
         Set the state (pose + twist) of the objects according to the given reference_frame
         If an element is omitted, the current value is conserved.
         '''
@@ -105,12 +105,12 @@ class GazeboObject:
             if not angular_twist: message.twist.angular = current_state.twist.angular
         GazeboObject.set_model_state_srv.wait_for_service()
         resp_set = GazeboObject.set_model_state_srv(message)
-        if not resp_set.success: rospy.logerr("Could not set state of "+self.gazebo_name+" , status : "+resp_set.status_message) 
+        if not resp_set.success: rospy.logerr("Could not set state of "+self.gazebo_name+" , status : "+resp_set.status_message)
 
 
     def get_state(self, reference_frame="world"):
         '''GazeboObject.get_state(self, reference_frame="world")
-        
+
         Retrieves the state (pose + twist) of the objects according to the given reference_frame
         A pose is made of a position and orintation.
         A twist is made of a linear twist and angular twist.
@@ -132,6 +132,8 @@ class GazeboObject:
         message.color.append(ColorRGBA(0.7*r/self.color_range, 0.7*g/self.color_range, 0.7*b/self.color_range, a/self.color_range))
         message.color.append(ColorRGBA(1-specular_coeff*(1-r/self.color_range), 1-specular_coeff*(1-g/self.color_range), 1-specular_coeff*(1-b/self.color_range), a/self.color_range))
         self.color_publishers[link].publish(message)
+        # print("color changed!")
+        # print(message)
 
 
     def set_color_range(self,R):

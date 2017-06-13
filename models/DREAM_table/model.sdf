@@ -29,6 +29,14 @@
                 <uri>model://DREAM_table/meshes/setup2.dae</uri>
             </mesh>
         </geometry>
+
+        <material>
+          <script>
+            <uri>file://media/materials/gazebo.material</uri>
+            <name>Gazebo/SkyBlue</name>
+          </script>
+        </material>
+
       </visual>
     </link>
 
@@ -44,6 +52,8 @@
         <geometry>
           <box><size>0.175 0.175 0.002</size></box>
         </geometry>
+
+
         <material>
           <diffuse>0.8 0.8 0.2 1</diffuse>
           <ambient>0.7 0.7 0.1 1</ambient>

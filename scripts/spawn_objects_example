@@ -10,8 +10,13 @@ import random
 import rospy
 import arm_scenario_simulator as arm_sim
 
+from baxter_interface import Limb
+
 from geometry_msgs.msg import Point, Quaternion
 from std_msgs.msg import Empty
+
+import subprocess
+subprocess.call(['rosrun', 'baxter_tools','enable_robot.py','-e'])
 
 
 def axis_to_quat(axis, angle):
@@ -29,21 +34,25 @@ class Environment:
         self.init()
 
     def del_objects(self):
-        for obj in self.objects.keys(): 
-            self.objects[obj].delete()        
+        for obj in self.objects.keys():
+            self.objects[obj].delete()
 
     def add_object(self, obj):
         if obj: self.objects[obj.gazebo_name] = obj
 
     def init(self):
-        ''' Create handles to (and spawn) simulated object in Gazebo'''
-        self.add_object( arm_sim.Button('button1').spawn( Point(x=0.5, y=0.1, z=0.76) ) )
-        self.add_object( arm_sim.Lever('lever1').spawn( Point(x=0.7, y=0.6, z=0.76), orientation=axis_to_quat([0,0,1], math.pi/4) ) )
 
-        self.add_object( arm_sim.GazeboObject('cube1').spawn(    'DREAM_cube',      Point(x=0.5, y=0.55, z=0.78) ))
-        self.add_object( arm_sim.GazeboObject('cube2').spawn(    'DREAM_cube',      Point(x=0.4, y=0.2, z=0.78) ))
-        self.add_object( arm_sim.GazeboObject('cylinder1').spawn('DREAM_cylinder',  Point(x=0.75, y=0.05, z=0.79) ))
-        self.add_object( arm_sim.GazeboObject('cylinder2').spawn('DREAM_cylinder',  Point(x=0.45, y=0.35, z=0.79) ))
+        def r(maxVar):
+            return random.random()*2*maxVar - maxVar
+
+        ''' Create handles to (and spawn) simulated object in Gazebo'''
+        self.add_object( arm_sim.Button('button1').spawn( Point(x=0.6+r(0.1), y=0+r(0.1), z=0.78) ) )
+        self.add_object( arm_sim.Lever('lever1').spawn( Point(x=0.6+r(0.1), y=0+r(0.6), z=0.78), orientation=axis_to_quat([0,0,1], math.pi/4) ) )
+
+        self.add_object( arm_sim.GazeboObject('cube1').spawn('DREAM_cube',Point(x=0.4+r(0.2),y=r(0.4),z=0.78)))
+        self.add_object( arm_sim.GazeboObject('cube2').spawn('DREAM_cube',Point(x=0.5+r(0.2),y=r(0.4),z=0.78)))
+        self.add_object( arm_sim.GazeboObject('cylinder1').spawn('DREAM_cylinder',Point(x=0.5+r(0.2),y=r(0.2),z=0.79)))
+        self.add_object( arm_sim.GazeboObject('cylinder2').spawn('DREAM_cylinder',Point(x=0.5+r(0.2),y=r(0.2),z=0.79)))
 
         # the following objects are not spawn, cause already present in the world before this script is run
         self.add_object( arm_sim.Pocket('table/pocket') )
@@ -58,15 +67,40 @@ class Environment:
         self.objects['light_table1'].set_light_state(on = False, force = True) # when force is False or ommited, the python object only publish a ros message if it considers it is necessary
         self.objects['light_table2'].set_light_state(on = False, force = True) # it is recommended to force at initialization time to ensure having a consistent state
 
-        self.objects['button1'].set_base_color(rgba = [30,20,220])
-        self.objects['button1'].set_button_color(rgba = [100,80,250])
+        #### Warning color changes can only be seen through camera
+        #### So everything is normal if you don't see changes on gazebo
 
-        self.objects['lever1'].set_base_color(rgba = [20,60,10])
-        self.objects['lever1'].set_lever_color(rgba = [150,190,150])
+        #colorButton1 = [30,20,220]
+        #colorButton2 = [100,80,250]
+        colorButton1 = [random.randint(0,255) for i in range(3)]
+        colorButton2 = [random.randint(0,255) for i in range(3)]
+        self.objects['button1'].set_base_color(rgba = colorButton1)
+        self.objects['button1'].set_button_color(rgba = colorButton2)
+
+        # colorLever1 = [20,60,10]
+        # colorLever2 = [150,190,150]
+        colorLever1 = [random.randint(0,255) for i in range(3)]
+        colorLever2 = [random.randint(0,255) for i in range(3)]
+        self.objects['lever1'].set_base_color(rgba = colorLever1)
+        self.objects['lever1'].set_lever_color(rgba = colorLever2)
 
         self.objects['cube1'].set_color(rgba = [230,220,10])
         self.objects['cube2'].set_color(rgba = [200,20,20])
         self.objects['cylinder1'].set_color(rgba = [50,50,220])
+
+        limb = Limb('left')
+        defaultPos = {'left_w0': 0.409,'left_w1':0.0485,'left_w2': -0.7146, 'left_e0': -0.0001, 'left_e1': 0.4947, 'left_s0': 0.1954, 'left_s1': 1.0470}
+
+        # limb.move_to_joint_positions({'left_s0': 0.8})
+        # limb.move_to_joint_positions({'left_s1': -0.2})
+        # limb.move_to_joint_positions({'left_s0': -0.1})
+        # limb.move_to_joint_positions({'left_e0': -1.4})
+        # limb.move_to_joint_positions({'left_e1': 1})
+
+        # limb.move_to_joint_positions({'left_s0': -0.7})
+        # limb.move_to_joint_positions({'left_s1': 0})
+        # limb.move_to_joint_positions({'left_e0': -1})
+
 
 
     def run(self):
@@ -88,14 +122,14 @@ class Environment:
         objects['light_table1'].set_light_state(on=light1_condition, color=light1_color)
 
         # Complex association : a light is turned on by a particular event, and turned off by another one
-        if objects['button1'].is_pressed() and objects['light_table2'].is_on(): 
+        if objects['button1'].is_pressed() and objects['light_table2'].is_on():
             objects['cube1'].set_state(position = Point(x=0.7, y=0.5*random.random(), z=0.85))
             objects['light_table2'].turn_off()
-        elif hasattr(self,'previous_lever_pushed') and self.previous_lever_pushed != objects['lever1'].is_pushed(): 
+        elif hasattr(self,'previous_lever_pushed') and self.previous_lever_pushed != objects['lever1'].is_pushed():
             objects['light_table2'].turn_on()
         self.previous_lever_pushed = objects['lever1'].is_pushed()
 
-        # to access an objects pose : 
+        # to access an objects pose :
         # objects[name].get_state().pose
 
 
@@ -107,7 +141,7 @@ def main():
         rospy.on_shutdown(env.del_objects)
         print("Running. Ctrl-c to quit")
         env.run()
-    except Exception: 
+    except Exception:
         env.del_objects()
         raise
 
