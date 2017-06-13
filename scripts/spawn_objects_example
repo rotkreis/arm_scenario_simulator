@@ -13,7 +13,9 @@ import arm_scenario_simulator as arm_sim
 from baxter_interface import Limb
 
 from geometry_msgs.msg import Point, Quaternion
+import std_msgs.msg
 from std_msgs.msg import Empty
+from std_msgs.msg import String
 
 import subprocess
 subprocess.call(['rosrun', 'baxter_tools','enable_robot.py','-e'])
@@ -29,6 +31,14 @@ class Environment:
         self.objects = {}
         rospy.Subscriber('/environment/reset', Empty, self.reset_callback, queue_size = 1)
 
+        # communication
+        self.loop_rate = rospy.Rate(10)
+        rospy.Subscriber("babbler", String , self.callback)
+    def callback(self, msg):
+        print("received msg: ", msg.data)
+        if msg.data == "change_color":
+            self.change_color()
+
     def reset_callback(self, message):
         self.del_objects()
         self.init()
@@ -39,6 +49,17 @@ class Environment:
 
     def add_object(self, obj):
         if obj: self.objects[obj.gazebo_name] = obj
+
+    def change_color(self):
+        colorButton1 = [random.randint(0,255) for i in range(3)]
+        colorButton2 = [random.randint(0,255) for i in range(3)]
+        self.objects['button1'].set_base_color(rgba = colorButton1)
+        self.objects['button1'].set_button_color(rgba = colorButton2)
+        colorLever1 = [random.randint(0,255) for i in range(3)]
+        colorLever2 = [random.randint(0,255) for i in range(3)]
+        self.objects['lever1'].set_base_color(rgba = colorLever1)
+        self.objects['lever1'].set_lever_color(rgba = colorLever2)
+        print("button color changed!")
 
     def init(self):
 
@@ -70,12 +91,15 @@ class Environment:
         #### Warning color changes can only be seen through camera
         #### So everything is normal if you don't see changes on gazebo
 
-        #colorButton1 = [30,20,220]
-        #colorButton2 = [100,80,250]
-        colorButton1 = [random.randint(0,255) for i in range(3)]
-        colorButton2 = [random.randint(0,255) for i in range(3)]
+        # colorButton1 = [30,20,220]
+        # colorButton2 = [100,80,250]
+        colorButton1 = [200,1,1]
+        colorButton2 = [1,80,1]
+        # colorButton1 = [random.randint(0,255) for i in range(3)]
+        # colorButton2 = [random.randint(0,255) for i in range(3)]
         self.objects['button1'].set_base_color(rgba = colorButton1)
         self.objects['button1'].set_button_color(rgba = colorButton2)
+        # self.objects['DREAM_table'].set_color(rgba = colorButton1, link='DREAM_table')
 
         # colorLever1 = [20,60,10]
         # colorLever2 = [150,190,150]
