@@ -51,6 +51,8 @@ class Environment:
         if obj: self.objects[obj.gazebo_name] = obj
 
     def change_color(self):
+        colorTable = [random.randint(0,255) for i in range(3)]
+        self.objects['table'].set_color(rgba = colorTable)
         colorButton1 = [random.randint(0,255) for i in range(3)]
         colorButton2 = [random.randint(0,255) for i in range(3)]
         self.objects['button1'].set_base_color(rgba = colorButton1)
@@ -59,7 +61,7 @@ class Environment:
         colorLever2 = [random.randint(0,255) for i in range(3)]
         self.objects['lever1'].set_base_color(rgba = colorLever1)
         self.objects['lever1'].set_lever_color(rgba = colorLever2)
-        print("button color changed!")
+        print("colors change!")
 
     def init(self):
 
@@ -67,6 +69,7 @@ class Environment:
             return random.random()*2*maxVar - maxVar
 
         ''' Create handles to (and spawn) simulated object in Gazebo'''
+        self.add_object( arm_sim.GazeboObject('table').spawn('DREAM_table', Point(x=0.6,y=0,z=0), orientation=axis_to_quat([0,0, 1],-1.570796), static=False ) )
         self.add_object( arm_sim.Button('button1').spawn( Point(x=0.6+r(0.1), y=0+r(0.1), z=0.78) ) )
         self.add_object( arm_sim.Lever('lever1').spawn( Point(x=0.6+r(0.1), y=0+r(0.6), z=0.78), orientation=axis_to_quat([0,0,1], math.pi/4) ) )
 
@@ -99,7 +102,8 @@ class Environment:
         # colorButton2 = [random.randint(0,255) for i in range(3)]
         self.objects['button1'].set_base_color(rgba = colorButton1)
         self.objects['button1'].set_button_color(rgba = colorButton2)
-        # self.objects['DREAM_table'].set_color(rgba = colorButton1, link='DREAM_table')
+        self.objects['table'].set_color(rgba = colorButton2)
+
 
         # colorLever1 = [20,60,10]
         # colorLever2 = [150,190,150]
@@ -162,6 +166,7 @@ def main():
     env = Environment()
     try:
         env.init()
+        env.change_color()
         rospy.on_shutdown(env.del_objects)
         print("Running. Ctrl-c to quit")
         env.run()
