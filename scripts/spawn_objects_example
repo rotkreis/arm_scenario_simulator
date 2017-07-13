@@ -70,13 +70,21 @@ class Environment:
 
         ''' Create handles to (and spawn) simulated object in Gazebo'''
         self.add_object( arm_sim.Table('table1').spawn(Point(x=0.6,y=0,z=0), orientation=axis_to_quat([0,0, 1],-1.570796), static=False ) )
-        self.add_object( arm_sim.Button('button1').spawn( Point(x=0.6+r(0.1), y=0+r(0.1), z=0.78) ) )
-        self.add_object( arm_sim.Lever('lever1').spawn( Point(x=0.6+r(0.1), y=0+r(0.6), z=0.78), orientation=axis_to_quat([0,0,1], math.pi/4) ) )
+        # self.add_object( arm_sim.Button('button1').spawn( Point(x=0.6+r(0.1), y=0+r(0.1), z=0.78) ) )
+        # self.add_object( arm_sim.Lever('lever1').spawn( Point(x=0.6+r(0.1), y=0+r(0.6), z=0.78), orientation=axis_to_quat([0,0,1], math.pi/4) ) )
 
         self.add_object( arm_sim.GazeboObject('cube1').spawn('DREAM_cube',Point(x=0.4+r(0.2),y=r(0.4),z=0.78)))
         self.add_object( arm_sim.GazeboObject('cube2').spawn('DREAM_cube',Point(x=0.5+r(0.2),y=r(0.4),z=0.78)))
         self.add_object( arm_sim.GazeboObject('cylinder1').spawn('DREAM_cylinder',Point(x=0.5+r(0.2),y=r(0.2),z=0.79)))
         self.add_object( arm_sim.GazeboObject('cylinder2').spawn('DREAM_cylinder',Point(x=0.5+r(0.2),y=r(0.2),z=0.79)))
+
+        #deterministic
+        self.add_object( arm_sim.Button('button1').spawn( Point(x=0.6, y=0.4, z=0.77) ) )
+        self.add_object( arm_sim.Lever('lever1').spawn( Point(x=0.5, y=0.1, z=0.78), orientation=axis_to_quat([0,0,1], math.pi/4) ) )
+        # self.add_object( arm_sim.GazeboObject('cube1').spawn('DREAM_cube',Point(x=0.4,y=0.2,z=0.78)))
+    # self.add_object( arm_sim.GazeboObject('cube2').spawn('DREAM_cube',Point(x=0.5,y=0.2,z=0.78)))
+        # self.add_object( arm_sim.GazeboObject('cylinder1').spawn('DREAM_cylinder',Point(x=0.5,y=0.4,z=0.79)))
+        # self.add_object( arm_sim.GazeboObject('cylinder2').spawn('DREAM_cylinder',Point(x=0.5,y=0.4,z=0.79)))
 
         # the following objects are not spawn, cause already present in the world before this script is run
         self.add_object( arm_sim.Pocket('table/pocket') )
@@ -94,18 +102,18 @@ class Environment:
         #### Warning color changes can only be seen through camera
         #### So everything is normal if you don't see changes on gazebo
 
-        # colorButton1 = [30,20,220]
-        # colorButton2 = [100,80,250]
-        colorButton1 = [random.randint(0,255) for i in range(3)]
-        colorButton2 = [random.randint(0,255) for i in range(3)]
+        colorButton1 = [20,60,10]
+        colorButton2 = [150,190,150]
+        # colorButton1 = [random.randint(0,255) for i in range(3)]
+        # colorButton2 = [random.randint(0,255) for i in range(3)]
         self.objects['button1'].set_base_color(rgba = colorButton1)
         self.objects['button1'].set_button_color(rgba = colorButton2)
 
 
-        # colorLever1 = [20,60,10]
-        # colorLever2 = [150,190,150]
-        colorLever1 = [random.randint(0,255) for i in range(3)]
-        colorLever2 = [random.randint(0,255) for i in range(3)]
+        colorLever1 = [30,60,100]
+        colorLever2 = [150,90,150]
+        # colorLever1 = [random.randint(0,255) for i in range(3)]
+        # colorLever2 = [random.randint(0,255) for i in range(3)]
         self.objects['lever1'].set_base_color(rgba = colorLever1)
         self.objects['lever1'].set_lever_color(rgba = colorLever2)
 
@@ -163,7 +171,7 @@ def main():
     env = Environment()
     try:
         env.init()
-        env.change_color()
+        # env.change_color()
         rospy.on_shutdown(env.del_objects)
         print("Running. Ctrl-c to quit")
         env.run()

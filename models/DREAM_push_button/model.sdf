@@ -1,7 +1,6 @@
 <?xml version='1.0'?>
 <sdf version="1.4">
 <model name="push_button">
-
     <link name="base">
       <pose>0 0 0 0 0 0</pose>
       <inertial>
@@ -22,6 +21,14 @@
                 <uri>model://DREAM_push_button/meshes/base.dae</uri>
             </mesh>
         </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1</mu>
+              <mu2>1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name="visual">
         <geometry>
@@ -52,6 +59,15 @@
           <iyz>0.0</iyz>
           <izz>0.0083</izz>
         </inertia>
+        <!-- <mass>30</mass>
+        <inertia>
+          <ixx>9.83</ixx>
+          <ixy>9.0</ixy>
+          <ixz>9.0</ixz>
+          <iyy>9.83</iyy>
+          <iyz>9.0</iyz>
+          <izz>9.83</izz>
+        </inertia> -->
       </inertial>
       <collision name="collision">
         <geometry>
@@ -60,6 +76,14 @@
                 <uri>model://DREAM_push_button/meshes/button.dae</uri>
             </mesh>
         </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1</mu>
+              <mu2>1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name="visual">
         <geometry>
